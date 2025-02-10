@@ -77,7 +77,6 @@ def read_formulas():
         # 指定 delimiter 为制表符
         reader = csv.DictReader(file, delimiter='\t')
         for row in reader:
-            print(row)
             name_dict[row['en']] = row['ch']
     try:
         # all_items = os.listdir(folder_path)
@@ -127,7 +126,7 @@ def write_prescription(prescription):
     patient_name = prescription['patient_name']
     date = prescription['prescription_date']
     file_name = patient_name + '_' + date + '.xxx'
-    print(file_name)
+    # print(file_name)
 
 def get_price(herbs):
     price_sum = 0
@@ -142,8 +141,8 @@ def index():
     (formula_names, formulas) = read_formulas()
     herbs_dict = read_herbs_dict()
     herbs = prescription['herbs']
-    print(formula_names)
-    print(formulas)
+    # print(formula_names)
+    # print(formulas)
     for name in formula_names:
         formula = formulas[name]
         for item in formula:
@@ -152,7 +151,7 @@ def index():
             item['price'] = round(float(price_per_g) * int(item['weight']), 2)
     price_sum = get_price(herbs)
     if request.method == 'POST':
-        print(request.form)
+        # print(request.form)
         if 'select_formula' in request.form:
             formula_name = request.form.get('select_formula')
             herbs = formulas[formula_name]
@@ -166,7 +165,7 @@ def index():
             formula_id = request.form.get('edit_item')
             weight = request.form.get('edit_weight')
             for herb in herbs:
-                print(herb)
+                # print(herb)
                 if herb['id'] == formula_id:
                     herb['weight'] = weight
                     price_per_g = herb['price_per_g']
@@ -191,7 +190,7 @@ def index():
             prescription['prescription_date'] = request.form.get('prescription_date')
             prescription['taking_days'] = request.form.get('taking_days')
             prescription['daily_dose'] = request.form.get('daily_dose')
-            print(prescription)
+            # print(prescription)
             price_sum = round(get_price(herbs) * int(prescription['taking_days']),0)
             write_prescription(prescription)
     return render_template('index.html', herbs=herbs, formula_names=formula_names, prescription=prescription, price_sum = price_sum)
@@ -206,7 +205,7 @@ def view_prescription():
 def manage_herbs():
     herbs = read_herbs()
     if request.method == 'POST':
-        print(request.form)
+        # print(request.form)
         if 'add_herb' in request.form:
             new_id = str(len(herbs) + 1)
             name = request.form.get('name')
