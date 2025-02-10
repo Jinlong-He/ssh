@@ -72,6 +72,13 @@ def read_formulas():
     formula_names = []
     formulas = {}
     folder_path = 'formulas'
+    name_dict = {}
+    with open('formulas.csv', 'r', newline='', encoding='utf-8') as file:
+        # 指定 delimiter 为制表符
+        reader = csv.DictReader(file, delimiter='\t')
+        for row in reader:
+            print(row)
+            name_dict[row['en']] = row['ch']
     try:
         # all_items = os.listdir(folder_path)
         all_items = os.listdir(folder_path)
@@ -79,7 +86,7 @@ def read_formulas():
             # item = item.encode('latin1').decode('utf-8')
             item_path = os.path.join(folder_path, item)
             if os.path.isfile(item_path) and item.endswith('.csv'):
-                formula_name = item[:-4]
+                formula_name = name_dict[item[:-4]]
                 formula_names.append(formula_name)
                 formula = read_formula(item_path)
                 formulas[formula_name] = formula
@@ -229,4 +236,6 @@ def manage_formulas():
     return render_template('manage_formulas.html', formulas=formulas)
 
 if __name__ == '__main__':
+    # app.run()
+    # app.run(debug=True)
     app.run(host='202.144.192.25', port=2223)
