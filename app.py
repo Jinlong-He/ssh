@@ -132,15 +132,15 @@ def index():
     (formula_names, formulas) = read_formulas()
     herbs_dict = read_herbs_dict()
     herbs = prescription['herbs']
-    print(formula_names)
-    print(formulas)
     for name in formula_names:
         formula = formulas[name]
         for item in formula:
+            print(item)
             price_per_g = herbs_dict[item['name']]
             item['price_per_g'] = price_per_g
             item['price'] = round(float(price_per_g) * int(item['weight']), 2)
     price_sum = get_price(herbs)
+    print(123123)
     if request.method == 'POST':
         print(request.form)
         if 'select_formula' in request.form:
