@@ -76,9 +76,10 @@ def read_formulas():
         # all_items = os.listdir(folder_path)
         all_items = os.listdir(folder_path)
         for item in all_items:
+            item = item.encode('latin1').decode('utf-8')
             item_path = os.path.join(folder_path, item)
             if os.path.isfile(item_path) and item.endswith('.csv'):
-                formula_name = item[:-4].encode('utf-8')
+                formula_name = item[:-4]
                 formula_names.append(formula_name)
                 formula = read_formula(item_path)
                 formulas[formula_name] = formula
