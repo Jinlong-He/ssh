@@ -226,4 +226,4 @@ def manage_formulas():
     return render_template('manage_formulas.html', formulas=formulas)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='202.144.192.25', port=2223)
