@@ -1,7 +1,9 @@
-import csv, os
+import csv, os, sys, io
 from flask import Flask, render_template, request, redirect, url_for
 from pypinyin import pinyin, Style
 import tempfile
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 
 app = Flask(__name__)
 
