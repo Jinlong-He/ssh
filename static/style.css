@@ -1,0 +1,206 @@
+/* 设置全局字体和背景颜色 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f9; /* 浅灰色背景 */
+    color: #333; /* 深灰色文字 */
+}
+
+/* 标题样式 */
+h1 {
+    text-align: center;
+    color: #007BFF; /* 蓝色标题 */
+    margin-bottom: 20px;
+}
+
+/* 导航栏样式 */
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background-color: #007BFF; /* 蓝色导航栏背景 */
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+nav ul li {
+    margin: 0;
+}
+
+nav ul li a {
+    display: block;
+    text-decoration: none;
+    color: white; /* 白色导航栏文字 */
+    padding: 15px 20px;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #0056b3; /* 鼠标悬停时导航栏项背景变深 */
+}
+
+/* 表单样式 */
+form {
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 表单添加阴影效果 */
+	vertical-align: middle;
+}
+
+form label {
+    /* display: block; */
+    /* margin-bottom: 5px; */
+    font-weight: bold;
+    display: inline-block;
+	/* height: 140px; */
+	vertical-align: middle;
+}
+
+form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+form input[type="submit"] {
+    background-color: #28a745; /* 绿色提交按钮 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form input[type="submit"]:hover {
+    background-color: #218838; /* 鼠标悬停时提交按钮颜色变深 */
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 表格添加阴影效果 */
+}
+
+table,
+th,
+td {
+    border: 1px solid #ccc;
+}
+
+th {
+    background-color: #007BFF; /* 蓝色表头背景 */
+    color: white;
+    padding: 15px;
+    text-align: left;
+}
+
+td {
+    padding: 15px;
+    text-align: left;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* 偶数行浅灰色背景 */
+}
+
+/* 设置删除按钮样式 */
+.delete-button {
+    background-color: #dc3545; /* 红色背景 */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.delete-button:hover {
+    background-color: #c82333; /* 鼠标悬停时颜色加深 */
+}
+
+/* 设置编辑按钮样式 */
+.edit-button {
+    background-color: #28a745; /* 绿色背景 */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.edit-button:hover {
+    background-color: #218838; /* 鼠标悬停时颜色加深 */
+}
+
+/* 设置保存修改按钮样式 */
+.save-button {
+    background-color: #007bff; /* 蓝色背景 */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.save-button:hover {
+    background-color: #0069d9; /* 鼠标悬停时颜色加深 */
+}
+
+.inline-fields {
+    display: flex;
+    gap: 10px;
+    align-items: center; /* 确保垂直居中 */
+    margin-bottom: 15px;
+}
+
+/* 定义一个统一的表单元素样式类 */
+.uniform-form-field {
+    height: 30px; /* 统一高度 */
+    padding: 0 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* 针对select元素，重置一些默认样式 */
+select.uniform-form-field {
+    height: 30px; /* 确保select元素高度一致 */
+    line-height: 30px; /* 调整行高以垂直居中 */
+}
+
+/* 针对日期输入框，重置一些默认样式 */
+input[type="date"].uniform-form-field {
+    height: 30px; /* 确保日期输入框高度一致 */
+}
+
+/* 方剂模板按钮样式 */
+.formula-button {
+    background-color: #007BFF; /* 蓝色按钮背景 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.formula-button:hover {
+    background-color: #0056b3; /* 鼠标悬停时按钮背景变深 */
+}
+
+.formula-button.selected {
+    background-color: #c82333;
+    color: white;
+}

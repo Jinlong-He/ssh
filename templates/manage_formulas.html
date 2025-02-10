@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理方剂</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>管理方剂</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">新建药方</a></li>
+            <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
+            <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
+            <li><a href="#">管理方剂</a></li>
+        </ul>
+    </nav>
+    <form method="post">
+        <label for="formula_name">方剂名称:</label>
+        <input type="text" id="formula_name" name="formula_name" required><br>
+        <label for="formula_herbs">方剂药材:</label>
+        <input type="text" id="formula_herbs" name="formula_herbs" required><br>
+        <input type="submit" name="add_formula" value="添加方剂">
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>方剂名称</th>
+                <th>方剂药材</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for formula in formulas %}
+            <tr>
+                <td>{{ formula.name }}</td>
+                <td>{{ formula.herbs }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

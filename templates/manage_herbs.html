@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理药材</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>管理药材</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">新建药方</a></li>
+            <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
+            <li><a href="#">管理药材</a></li>
+            <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
+        </ul>
+    </nav>
+    <h2>添加药材</h2>
+    <form method="post">
+        <div class="inline-fields">
+            <label for="name">药材名称:</label>
+            <input type="text" id="name" name="name" required class="uniform-form-field" style="width: 100px;">
+            <label for="price_per_g">单价（g）:</label>
+            <input type="text" id="price_per_g" name="price_per_g" step="0.01" required class="uniform-form-field" style="width: 50px;">
+            <input type="submit" name="add_herb" value="添加药材">
+        </div>
+    </form>
+    <h2>药材列表</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>药材名称</th>
+                <th>单价（g）</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for herb in herbs %}
+            <tr>
+                <td>{{ herb.id }}</td>
+                <td>{{ herb.name }}</td>
+                <td>{{ herb.price_per_g }}元</td>
+                <td>
+                    <button class="delete-button" onclick="deleteHerb('{{ herb.id }}')">删除</button>
+                    <button class="edit-button" onclick="showEditHerbForm('{{ herb.id }}', '{{ herb.name }}', '{{ herb.price_per_g }}')">编辑</button>
+                    <form id="edit-form-{{ herb.id }}" method="post" style="display: none;">
+                        <input type="hidden" name="edit_herb" value="{{ herb.id }}">
+                        <label for="name">药材名称:</label>
+                        <input type="text" name="edit_name" value="{{ herb.name }}" required class="uniform-form-field" style="width: 100px;">
+                        <!-- <input type="text" id="taking_days" name="taking_days" required class="uniform-form-field" style="width: 50px;"> -->
+                        <label for="price_per_g">单价（g）:</label>
+                        <input type="number" name="edit_price_per_g" value="{{ herb.price_per_g }}" step="0.01" required class="uniform-form-field" style="width: 100px;">
+                        <input type="submit" class="save-button" value="保存修改">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        function showEditHerbForm(id, name, price) {
+            const form = document.getElementById(`edit-form-${id}`);
+            form.style.display = 'inline';
+        }
+
+        function deleteHerb(id) {
+            if (confirm('确定要删除该药材吗？')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'delete_herb';
+                input.value = id;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</body>
+
+</html>

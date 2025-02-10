@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看药方</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>查看药方</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">新建药方</a></li>
+            <li><a href="#">查看药方</a></li>
+            <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
+            <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
+        </ul>
+    </nav>
+    <table>
+        <thead>
+            <tr>
+                <th>患者姓名</th>
+                <th>性别</th>
+                <th>年龄</th>
+                <th>日期</th>
+                <th>方剂模板</th>
+                <th>服用天数</th>
+                <th>每日剂量</th>
+                <th>药方名称</th>
+                <th>药材</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prescription in prescriptions %}
+            <tr>
+                <td>{{ prescription.patient_name }}</td>
+                <td>{{ prescription.patient_gender }}</td>
+                <td>{{ prescription.patient_age }}</td>
+                <td>{{ prescription.prescription_date }}</td>
+                <td>{{ prescription.formula_template }}</td>
+                <td>{{ prescription.taking_days }}</td>
+                <td>{{ prescription.daily_dose }}</td>
+                <td>{{ prescription.name }}</td>
+                <td>{{ prescription.herbs }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
