@@ -89,7 +89,9 @@ def read_formula(formula_file):
     try:
         with open(formula_file, 'r', newline='', encoding='utf-8') as file:
             # 指定 delimiter 为制表符
+            print(11111)
             reader = csv.DictReader(file, delimiter='\t')
+            print(2222)
             for row in reader:
                 formula.append(row)
     except FileNotFoundError:
