@@ -73,8 +73,8 @@ def read_formulas():
     formulas = {}
     folder_path = 'formulas'
     try:
-        all_items = os.listdir(folder_path)
-        file_names = []
+        # all_items = os.listdir(folder_path)
+        all_items = os.listdir(folder_path.encode('utf-8')).decode('utf-8')
         for item in all_items:
             item_path = os.path.join(folder_path, item)
             if os.path.isfile(item_path) and item.endswith('.csv'):
