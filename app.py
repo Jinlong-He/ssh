@@ -129,13 +129,11 @@ def get_price(herbs):
 # write_prescription([], temp)
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    print(111)
     (formula_names, formulas) = read_formulas()
-    print(222)
     herbs_dict = read_herbs_dict()
-    print(333)
     herbs = prescription['herbs']
-    print(444)
+    print(formula_names)
+    print(formulas)
     for name in formula_names:
         formula = formulas[name]
         for item in formula:
