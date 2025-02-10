@@ -89,9 +89,7 @@ def read_formula(formula_file):
     try:
         with open(formula_file, 'r', newline='', encoding='utf-8') as file:
             # 指定 delimiter 为制表符
-            print(11111)
             reader = csv.DictReader(file, delimiter='\t')
-            print(2222)
             for row in reader:
                 formula.append(row)
     except FileNotFoundError:
@@ -131,9 +129,13 @@ def get_price(herbs):
 # write_prescription([], temp)
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    print(111)
     (formula_names, formulas) = read_formulas()
+    print(222)
     herbs_dict = read_herbs_dict()
+    print(333)
     herbs = prescription['herbs']
+    print(444)
     for name in formula_names:
         formula = formulas[name]
         for item in formula:
