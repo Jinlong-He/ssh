@@ -21,20 +21,20 @@
     <form method="post">
         <div class="inline-fields">
             <label for="patient_name">患者姓名:</label>
-            <input type="text" id="patient_name" name="patient_name" required class="uniform-form-field" style="width: 100px;">
+            <input type="text" id="patient_name" name="patient_name" value="{{prescription.patient_name}}" required class="uniform-form-field" style="width: 100px;">
             <label for="patient_gender">性别:</label>
-            <select id="patient_gender" name="patient_gender" required class="uniform-form-field">
+            <select id="patient_gender" name="patient_gender" value="{{prescription.patient_gender}}" required class="uniform-form-field">
                 <option value="男">男</option>
                 <option value="女">女</option>
             </select>
             <label for="patient_age">年龄:</label>
-            <input type="text" id="patient_age" name="patient_age" required class="uniform-form-field" style="width: 50px;">
+            <input type="text" id="patient_age" name="patient_age" value="{{prescription.patient_age}}" required class="uniform-form-field" style="width: 50px;">
             <label for="prescription_date">日期:</label>
-            <input type="date" id="prescription_date" name="prescription_date" required class="uniform-form-field">
+            <input type="date" id="prescription_date" name="prescription_date" value="{{prescription.prescription_date}}" required class="uniform-form-field">
             <label for="taking_days">服用天数:</label>
-            <input type="text" id="taking_days" name="taking_days" required class="uniform-form-field" style="width: 50px;">
+            <input type="text" id="taking_days" name="taking_days" value="{{prescription.taking_days}}" required class="uniform-form-field" style="width: 50px;">
             <label for="daily_dose">每日剂量:</label>
-            <input type="text" id="daily_dose" name="daily_dose" required class="uniform-form-field" style="width: 50px;">
+            <input type="text" id="daily_dose" name="daily_dose" value="{{prescription.daily_dose}}" required class="uniform-form-field" style="width: 50px;">
             <input type="submit" name="new_prescription" value="保存药方">
         </div>
     </form>
@@ -121,12 +121,12 @@
             }
         }
         // 设置日期输入框的默认值为当日日期
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('prescription_date').value = today;
-        document.getElementById('patient_name').value = '张三';
-        document.getElementById('patient_age').value = 30;
-        document.getElementById('taking_days').value = 7;
-        document.getElementById('daily_dose').value = 2;
+        // const today = new Date().toISOString().split('T')[0];
+        // document.getElementById('prescription_date').value = today;
+        // document.getElementById('patient_name').value = '张三';
+        // document.getElementById('patient_age').value = 30;
+        // document.getElementById('taking_days').value = 14;
+        // document.getElementById('daily_dose').value = 2;
 
         function selectFormula(button, formulaName) {
             // 移除所有按钮的选中状态

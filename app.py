@@ -1,7 +1,7 @@
 import csv, os, sys, io
 from flask import Flask, render_template, request, redirect, url_for
 from pypinyin import pinyin, Style
-import tempfile
+import datetime
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 
@@ -11,13 +11,13 @@ app = Flask(__name__)
 prescriptions = []
 formulas = []
 herbs_file = 'herbs.csv'
-prescription={  'patient_name': '',
-                'patient_gender': '',
-                'patient_age': 0,
-                'prescription_date': 0,
+prescription={  'patient_name': '张三',
+                'patient_gender': '男',
+                'patient_age': 30,
+                'prescription_date': datetime.date.today(),
                 'formula_template': '',
-                'taking_days': 0,
-                'daily_dose': 0,
+                'taking_days': 14,
+                'daily_dose': 1,
                 'herbs': []
             }
 price_sum = 0
@@ -236,5 +236,5 @@ def manage_formulas():
 
 if __name__ == '__main__':
     # app.run()
-    # app.run(debug=True)
-    app.run(host='202.144.192.25', port=2223)
+    app.run(debug=True)
+    # app.run(host='202.144.192.25', port=2223)
