@@ -5,19 +5,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新建药方</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 添加高亮样式 */
+       .suggestions li.highlight {
+            background-color: #d349a9;
+        }
+    </style>
 </head>
 
 <body>
     <h1>新建药方</h1>
-    <form>
-        <label for="prescription-name">药方名称:</label>
-        <input type="text" id="prescription-name" name="prescription-name"><br>
-        <label for="herbs">药材:</label>
-        <input type="text" id="herbs" name="herbs"><br>
-        <input type="submit" value="保存药方">
-    </form>
-    <a href="index.html">返回主页</a>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
+            <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
+            <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
+            <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <!-- 左侧：药方模板选择或新建 -->
+        <div class="left-panel">
+            <h2>选择药方模板或新建</h2>
+            <button type="button" class="formula-button-new" onclick="newFormula(this)">新建空白药方</button>
+            <div id="formula-buttons">
+                {% for formula_name in formula_names %}
+                <button type="button" class="formula-button" onclick="selectFormula(this, '{{ formula_name }}')">{{ formula_name }}</button>
+                <br>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- 右侧：分页表格 -->
+        <div class="right-panel">
+            <!-- 新增患者信息部分 -->
+            <div class="patient-info">
+                <label for="patient_name">患者姓名:</label>
+                <input type="text" id="patient_name" name="patient_name" value="张三">
+                <label for="patient_gender">性别:</label>
+                <input type="text" id="patient_gender" name="patient_gender" value="男">
+                <label for="patient_age">年龄:</label>
+                <input type="text" id="patient_age" name="patient_age" value="30">
+                <br>
+                <label for="prescription_date">日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期:</label>
+                <input type="date" id="prescription_date" name="prescription_date" value="{{ today_date }}">
+                <label for="prescription_pay_count">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;付数:</label>
+                <input type="text" id="prescription_pay_count" name="prescription_pay_count" value="14" oninput="calculateGrandTotal()">
+                <label for="prescription_dose_count">剂数:</label>
+                <input type="text" id="prescription_dose_count" name="prescription_dose_count" value="28">
+                <button class="edit-button" id="sendTableData">保存药方</button>
+            </div>
+            <h2>药方详情</h2>
+            <table id="prescription-table">
+                <thead>
+                    <tr>
+                        <th>药材名称</th>
+                        <th>重量（g）</th>
+                        <th>单价（元/g）</th>
+                        <th>总价（元）</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" class="herb-name" placeholder="输入药材首字母" oninput="autocompleteHerbs(this)"
+                                onkeydown="handleKeyDown(event, this)">
+                            <ul class="suggestions"></ul>
+                        </td>
+                        <td><input type="number" class="herb-weight" step="0.01" oninput="calculateTotal(this.parentNode.parentNode); calculateGrandTotal()"
+                                onkeydown="handleWeightKeyDown(event, this)"></td>
+                        <td><input type="text" class="herb-price" readonly></td>
+                        <td><input type="text" class="herb-total" readonly></td>
+                        <td><button class="delete-button" onclick="deleteRow(this); calculateGrandTotal(); return false">删除</button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">合计</td>
+                        <td><input type="text" id="grand-total" readonly></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const herbs = {{ herbs|tojson }};
+        let highlightedIndex = 0; // 记录当前高亮的候选项索引
+
+        function autocompleteHerbs(input) {
+            const value = input.value;
+            const suggestions = input.nextElementSibling;
+            suggestions.innerHTML = '';
+            highlightedIndex = 0; // 重置高亮索引
+
+            if (value.length > 0) {
+                for (const key in herbs) {
+                    if (key.startsWith(value)) {
+                        const li = document.createElement('li');
+                        li.textContent = herbs[key].name;
+                        li.addEventListener('click', function () {
+                            input.value = this.textContent;
+                            const row = input.parentNode.parentNode;
+                            const priceInput = row.querySelector('.herb-price');
+                            const key = Object.keys(herbs).find(k => herbs[k].name === this.textContent);
+                            priceInput.value = herbs[key].price_per_g;
+                            suggestions.innerHTML = '';
+                            calculateTotal(row);
+                            // 选择药材后自动聚焦到重量输入框
+                            row.querySelector('.herb-weight').focus();
+                            calculateGrandTotal();
+                        });
+                        suggestions.appendChild(li);
+                    }
+                }
+                if (suggestions.firstChild) {
+                    suggestions.firstChild.classList.add('highlight'); // 默认高亮第一个候选项
+                }
+            }
+        }
+
+        function calculateTotal(row) {
+            const weightInput = row.querySelector('.herb-weight');
+            const priceInput = row.querySelector('.herb-price');
+            const totalInput = row.querySelector('.herb-total');
+
+            const weight = parseFloat(weightInput.value);
+            const price = parseFloat(priceInput.value);
+
+            if (!isNaN(weight) && !isNaN(price)) {
+                const total = weight * price;
+                totalInput.value = total.toFixed(2);
+            } else {
+                totalInput.value = '';
+            }
+        }
+
+        function handleKeyDown(event, input) {
+            const suggestions = input.nextElementSibling;
+            const suggestionItems = suggestions.getElementsByTagName('li');
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault(); // 阻止默认的页面滚动
+                if (suggestionItems.length > 0) {
+                    suggestionItems[highlightedIndex].classList.remove('highlight');
+                    highlightedIndex = (highlightedIndex + 1) % suggestionItems.length;
+                    suggestionItems[highlightedIndex].classList.add('highlight');
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault(); // 阻止默认的页面滚动
+                if (suggestionItems.length > 0) {
+                    suggestionItems[highlightedIndex].classList.remove('highlight');
+                    highlightedIndex = (highlightedIndex - 1 + suggestionItems.length) % suggestionItems.length;
+                    suggestionItems[highlightedIndex].classList.add('highlight');
+                }
+            } else if (event.key === 'Enter') {
+                const highlightedItem = suggestionItems[highlightedIndex];
+                if (highlightedItem) {
+                    input.value = highlightedItem.textContent;
+                    const row = input.parentNode.parentNode;
+                    const key = Object.keys(herbs).find(k => herbs[k].name === highlightedItem.textContent);
+                    const priceInput = row.querySelector('.herb-price');
+                    priceInput.value = herbs[key].price_per_g;
+                    suggestions.innerHTML = '';
+                    calculateTotal(row);
+                    // 选择药材后自动聚焦到重量输入框
+                    row.querySelector('.herb-weight').focus();
+                    calculateGrandTotal();
+                }
+            }
+        }
+
+        function handleWeightKeyDown(event, input) {
+            if (event.key === 'Enter') {
+                const table = document.getElementById('prescription-table');
+                const newRow = table.tBodies[0].insertRow();
+
+                const nameCell = newRow.insertCell();
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'herb-name';
+                nameInput.placeholder = '输入药材首字母';
+                nameInput.oninput = function () {
+                    autocompleteHerbs(this);
+                };
+                nameInput.onkeydown = function (e) {
+                    handleKeyDown(e, this);
+                };
+                const nameSuggestions = document.createElement('ul');
+                nameSuggestions.className = 'suggestions';
+                nameCell.appendChild(nameInput);
+                nameCell.appendChild(nameSuggestions);
+
+                const weightCell = newRow.insertCell();
+                const weightInput = document.createElement('input');
+                weightInput.type = 'number';
+                weightInput.className = 'herb-weight';
+                weightInput.step = '0.01';
+                weightInput.oninput = function () {
+                    calculateTotal(newRow);
+                    calculateGrandTotal();
+                };
+                weightInput.onkeydown = function (e) {
+                    handleWeightKeyDown(e, this);
+                };
+                weightCell.appendChild(weightInput);
+
+                const priceCell = newRow.insertCell();
+                const priceInput = document.createElement('input');
+                priceInput.type = 'text';
+                priceInput.className = 'herb-price';
+                priceInput.readonly = true;
+                priceCell.appendChild(priceInput);
+
+                const totalCell = newRow.insertCell();
+                const totalInput = document.createElement('input');
+                totalInput.type = 'text';
+                totalInput.className = 'herb-total';
+                totalInput.readonly = true;
+                totalCell.appendChild(totalInput);
+
+                const actionCell = newRow.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.className = 'delete-button'
+                deleteButton.onclick = function () {
+                    deleteRow(this);
+                    calculateGrandTotal();
+                };
+                actionCell.appendChild(deleteButton);
+
+                // 新行添加后自动聚焦到新的药材名称输入框
+                nameInput.focus();
+            }
+        }
+
+        function deleteRow(button) {
+            const row = button.parentNode.parentNode;
+            const table = document.getElementById('prescription-table');
+            const rowIndex = Array.from(table.tBodies[0].rows).indexOf(row);
+            if (rowIndex > -1) {
+                table.tBodies[0].deleteRow(rowIndex);
+            }
+        }
+
+        function calculateGrandTotal() {
+            const totalInputs = document.querySelectorAll('.herb-total');
+            let sum = 0;
+            totalInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    sum += value;
+                }
+            });
+            const payCount = parseFloat(document.getElementById('prescription_pay_count').value);
+            const grandTotalInput = document.getElementById('grand-total');
+            if (!isNaN(payCount)) {
+                grandTotalInput.value = (sum * payCount).toFixed(2);
+            } else {
+                grandTotalInput.value = '';
+            }
+        }
+        // 添加点击事件监听器，用于发送表格数据
+        document.getElementById('sendTableData').addEventListener('click', function () {
+            const table = document.getElementById('prescription-table');
+            const rows = table.tBodies[0].rows;
+            const tableData = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const nameInput = row.querySelector('.herb-name');
+                const weightInput = row.querySelector('.herb-weight');
+                const priceInput = row.querySelector('.herb-price');
+                const totalInput = row.querySelector('.herb-total');
+                const rowData = {
+                    herbName: nameInput.value,
+                    weight: weightInput.value,
+                    price: priceInput.value,
+                    total: totalInput.value
+                };
+                tableData.push(rowData);
+            }
+            patient_info = {
+                patient_name: document.getElementById('patient_name').value,
+                patient_gender: document.getElementById('patient_gender').value,
+                patient_age: document.getElementById('patient_age').value,
+                prescription_date: document.getElementById('prescription_date').value,
+                taking_days: document.getElementById('prescription_pay_count').value,
+                daily_dose: document.getElementById('prescription_dose_count').value,
+            }
+            const dateToSend = {
+                tableData: tableData,
+                total_price: document.getElementById('grand-total').value,
+                patient_info: patient_info
+            };
+            // 使用 fetch API 发送数据
+            fetch('/send_prescription_table', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dateToSend)
+            })
+           .then(response => response.json())
+           .then(data => {
+                console.log('服务器响应:', data);
+            })
+           .catch(error => {
+                console.error('请求出错:', error);
+            });
+        });
+
+        function newFormula(button, formulaName) {
+            const table = document.getElementById('prescription-table');
+            const tBody = table.tBodies[0];
+            const rows = tBody.rows;
+            const rowCount = rows.length;
+            for (let i = rowCount - 1; i >= 0; i--) {
+                tBody.deleteRow(i);
+            }
+            const newRow = tBody.insertRow();
+
+            const nameCell = newRow.insertCell();
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'herb-name';
+            nameInput.placeholder = '输入药材首字母';
+            nameInput.oninput = function () {
+                autocompleteHerbs(this);
+            };
+            nameInput.onkeydown = function (e) {
+                handleKeyDown(e, this);
+            };
+            const nameSuggestions = document.createElement('ul');
+            nameSuggestions.className = 'suggestions';
+            nameCell.appendChild(nameInput);
+            nameCell.appendChild(nameSuggestions);
+
+            const weightCell = newRow.insertCell();
+            const weightInput = document.createElement('input');
+            weightInput.type = 'number';
+            weightInput.className = 'herb-weight';
+            weightInput.step = '0.01';
+            weightInput.oninput = function () {
+                calculateTotal(newRow);
+                calculateGrandTotal();
+            };
+            weightInput.onkeydown = function (e) {
+                handleWeightKeyDown(e, this);
+            };
+            weightCell.appendChild(weightInput);
+
+            const priceCell = newRow.insertCell();
+            const priceInput = document.createElement('input');
+            priceInput.type = 'text';
+            priceInput.className = 'herb-price';
+            priceInput.readonly = true;
+            priceCell.appendChild(priceInput);
+
+            const totalCell = newRow.insertCell();
+            const totalInput = document.createElement('input');
+            totalInput.type = 'text';
+            totalInput.className = 'herb-total';
+            totalInput.readonly = true;
+            totalCell.appendChild(totalInput);
+
+            const actionCell = newRow.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '删除';
+            deleteButton.className = 'delete-button'
+            deleteButton.onclick = function () {
+                deleteRow(this);
+                calculateGrandTotal();
+            };
+            actionCell.appendChild(deleteButton);
+
+            // 新行添加后自动聚焦到新的药材名称输入框
+            nameInput.focus();
+        }
+
+        const formulas = {{ formulas|tojson }};
+        function selectFormula(button, formulaName) {
+            // 移除所有按钮的选中状态
+            const buttons = document.querySelectorAll('.formula-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            // 给当前点击的按钮添加选中状态
+            button.classList.add('selected');
+            const formula = formulas[formulaName];
+            const table = document.getElementById('prescription-table');
+            const tBody = table.tBodies[0];
+            const rows = tBody.rows;
+            const rowCount = rows.length;
+            for (let i = rowCount - 1; i >= 0; i--) {
+                tBody.deleteRow(i);
+            }
+            for (let i = 0; i < formula.length; i++) {
+                item = formula[i];
+                const newRow = tBody.insertRow();
+                const nameCell = newRow.insertCell();
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'herb-name';
+                nameInput.placeholder = '输入药材首字母';
+                nameInput.oninput = function () {
+                    autocompleteHerbs(this);
+                };
+                nameInput.onkeydown = function (e) {
+                    handleKeyDown(e, this);
+                };
+                const nameSuggestions = document.createElement('ul');
+                nameSuggestions.className = 'suggestions';
+                nameInput.value = item['name'];
+                nameCell.appendChild(nameInput);
+                nameCell.appendChild(nameSuggestions);
+
+                const weightCell = newRow.insertCell();
+                const weightInput = document.createElement('input');
+                weightInput.type = 'number';
+                weightInput.className = 'herb-weight';
+                weightInput.step = '0.01';
+                weightInput.oninput = function () {
+                    calculateTotal(newRow);
+                    calculateGrandTotal();
+                };
+                weightInput.onkeydown = function (e) {
+                    handleWeightKeyDown(e, this);
+                };
+                weightInput.value = item['weight'];
+                weightCell.appendChild(weightInput);
+
+                const priceCell = newRow.insertCell();
+                const priceInput = document.createElement('input');
+                priceInput.type = 'text';
+                priceInput.className = 'herb-price';
+                priceInput.readonly = true;
+                priceInput.value = item['price_per_g'];
+                priceCell.appendChild(priceInput);
+
+                const totalCell = newRow.insertCell();
+                const totalInput = document.createElement('input');
+                totalInput.type = 'text';
+                totalInput.className = 'herb-total';
+                totalInput.readonly = true;
+                totalInput.value = item['price'];
+                totalCell.appendChild(totalInput);
+
+                const actionCell = newRow.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.className = 'delete-button'
+                deleteButton.onclick = function () {
+                    deleteRow(this);
+                    calculateGrandTotal();
+                };
+                actionCell.appendChild(deleteButton);
+            }
+            calculateGrandTotal();
+        }
+    </script>
 </body>
 
 </html>

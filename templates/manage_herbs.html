@@ -8,11 +8,44 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
+<style>
+form label {
+    /* display: block; */
+    /* margin-bottom: 5px; */
+    font-weight: bold;
+    display: inline-block;
+	/* height: 140px; */
+	vertical-align: middle;
+}
+
+form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+form input[type="submit"] {
+    background-color: #28a745; /* 绿色提交按钮 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form input[type="submit"]:hover {
+    background-color: #218838; /* 鼠标悬停时提交按钮颜色变深 */
+}
+</style>
 <body>
     <h1>管理药材</h1>
     <nav>
         <ul>
-            <li><a href="{{ url_for('index') }}">新建药方</a></li>
+            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
             <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
             <li><a href="#">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>

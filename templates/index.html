@@ -4,153 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新建药方</title>
+    <title>沈博士中医诊所</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-    <h1>新建药方</h1>
+    <h1>沈博士中医诊所</h1>
     <nav>
         <ul>
-            <li><a href="{{ url_for('index') }}">新建药方</a></li>
+            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
             <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
             <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
         </ul>
     </nav>
-    <form method="post">
-        <div class="inline-fields">
-            <label for="patient_name">患者姓名:</label>
-            <input type="text" id="patient_name" name="patient_name" value="{{prescription.patient_name}}" required class="uniform-form-field" style="width: 100px;">
-            <label for="patient_gender">性别:</label>
-            <select id="patient_gender" name="patient_gender" value="{{prescription.patient_gender}}" required class="uniform-form-field">
-                <option value="男">男</option>
-                <option value="女">女</option>
-            </select>
-            <label for="patient_age">年龄:</label>
-            <input type="text" id="patient_age" name="patient_age" value="{{prescription.patient_age}}" required class="uniform-form-field" style="width: 50px;">
-            <label for="prescription_date">日期:</label>
-            <input type="date" id="prescription_date" name="prescription_date" value="{{prescription.prescription_date}}" required class="uniform-form-field">
-            <label for="taking_days">服用天数:</label>
-            <input type="text" id="taking_days" name="taking_days" value="{{prescription.taking_days}}" required class="uniform-form-field" style="width: 50px;">
-            <label for="daily_dose">每日剂量:</label>
-            <input type="text" id="daily_dose" name="daily_dose" value="{{prescription.daily_dose}}" required class="uniform-form-field" style="width: 50px;">
-            <input type="submit" name="new_prescription" value="保存药方">
-        </div>
-    </form>
-    <form method="post">
-        <div class="inline-fields">
-            <label for="name">药材名称:</label>
-            <input type="text" id="name" name="name" required class="uniform-form-field" style="width: 100px;">
-            <label for="weight">重量（g）:</label>
-            <input type="text" id="weight" name="weight" step="1" required class="uniform-form-field" style="width: 50px;">
-            <input type="submit" name="add_item" value="添加药材">
-        </div>
-    </form>
-        <label for="formula_template">方剂模板:</label>
-        <div id="formula-buttons">
-            {% for formula_name in formula_names %}
-            <button type="button" class="formula-button" onclick="selectFormula(this, '{{ formula_name }}')">{{ formula_name }}</button>
-            {% endfor %}
-        </div>
-        <!-- 新的列表区域 -->
-        <div id="formula-details" style="display: block;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>序号</th>
-                        <th>药材名称</th>
-                        <th>重量</th>
-                        <th>单价</th>
-                        <th>总价</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="formula-items">
-                    {% for herb in herbs %}
-                    <tr>
-                        <td>{{ herb.id }}</td>
-                        <td>{{ herb.name }}</td>
-                        <td>{{ herb.weight }}克</td>
-                        <td>{{ herb.price_per_g }}元</td>
-                        <td>{{ herb.price }}元</td>
-                        <td>
-                            <button class="delete-button" onclick="deleteItem('{{ herb.id }}')">删除</button>
-                            <button class="edit-button" onclick="showEditItemForm('{{ herb.id }}', '{{ herb.weight }}'); return false;">编辑</button>
-                            <form id="edit-item-form-{{ herb.id }}" method="post" style="display: none;">
-                                <input type="hidden" name="edit_item" value="{{ herb.id }}">
-                                <label for="weight">重量（g）:</label>
-                                <input type="number" name="edit_weight" value="{{ herb.weight }}" step="1" required class="uniform-form-field" style="width: 100px;">
-                                <input type="submit" class="save-button" value="保存修改">
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td></td>
-                        <td>总计</td>
-                        <td></td>
-                        <td></td>
-                        <td>{{price_sum}}</td>
-                    </tr>
-                    <!-- 这里将动态添加药材信息 -->
-                </tbody>
-            </table>
-        </div>
-    <script>
-        function showEditItemForm(id, weight) {
-            const form = document.getElementById(`edit-item-form-${id}`);
-            form.style.display = 'inline';
-        }
-
-        function saveEdit(id) {
-        }
-
-        function deleteItem(id) {
-            if (confirm('确定要删除该药材吗？')) {
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = '';
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'delete_item';
-                input.value = id;
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-        // 设置日期输入框的默认值为当日日期
-        // const today = new Date().toISOString().split('T')[0];
-        // document.getElementById('prescription_date').value = today;
-        // document.getElementById('patient_name').value = '张三';
-        // document.getElementById('patient_age').value = 30;
-        // document.getElementById('taking_days').value = 14;
-        // document.getElementById('daily_dose').value = 2;
-
-        function selectFormula(button, formulaName) {
-            // 移除所有按钮的选中状态
-            const buttons = document.querySelectorAll('.formula-button');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-            // 给当前点击的按钮添加选中状态
-            button.classList.add('selected');
-
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = '';
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'select_formula';
-            input.value = formulaName;
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-
-        }
-
-
-
-    </script>
 </body>
 
 </html>
