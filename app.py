@@ -186,7 +186,7 @@ def get_price(herbs):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    pass
+    return render_template('index.html')
     # return render_template('index.html', herbs=herbs, formula_names=formula_names, prescription=prescription,
                         #    price_sum=price_sum)
 
