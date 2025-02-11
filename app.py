@@ -186,64 +186,9 @@ def get_price(herbs):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    (formula_names, formulas) = read_formulas()
-    herbs_dict = read_herbs_dict()
-    herbs = prescription['herbs']
-    # print(formula_names)
-    # print(formulas)
-    for name in formula_names:
-        formula = formulas[name]
-        for item in formula:
-            price_per_g = herbs_dict[item['name']]
-            item['price_per_g'] = price_per_g
-            item['price'] = round(float(price_per_g) * int(item['weight']), 2)
-    price_sum = get_price(herbs)
-    if request.method == 'POST':
-        # print(request.form)
-        if 'select_formula' in request.form:
-            formula_name = request.form.get('select_formula')
-            herbs = formulas[formula_name]
-        elif 'delete_item' in request.form:
-            herb_id = request.form.get('delete_item')
-            herbs = [herb for herb in herbs if herb['id'] != herb_id]
-            for herb in herbs:
-                if int(herb['id']) > int(herb_id):
-                    herb['id'] = str(int(herb['id']) - 1)
-        elif 'edit_item' in request.form:
-            formula_id = request.form.get('edit_item')
-            weight = request.form.get('edit_weight')
-            for herb in herbs:
-                # print(herb)
-                if herb['id'] == formula_id:
-                    herb['weight'] = weight
-                    price_per_g = herb['price_per_g']
-                    herb['price'] = round(float(price_per_g) * int(weight), 2)
-                    break
-        elif 'add_item' in request.form:
-            new_id = str(len(herbs) + 1)
-            name = request.form.get('name')
-            weight = request.form.get('weight')
-            abbreviation = get_chinese_initials(name)
-            if name in herbs_dict:
-                price_per_g = herbs_dict[name]
-                price = round(float(price_per_g) * int(weight), 2)
-                new_herb = {'id': new_id, 'name': name, 'weight': weight, 'price_per_g': price_per_g, 'price': price}
-                herbs.append(new_herb)
-        # prescription['herbs'] = herbs
-        price_sum = get_price(herbs)
-        if 'new_prescription' in request.form:
-            pass
-            # prescription['patient_name'] = request.form.get('patient_name')
-            # prescription['patient_gender'] = request.form.get('patient_gender')
-            # prescription['patient_age'] = request.form.get('patient_age')
-            # prescription['prescription_date'] = request.form.get('prescription_date')
-            # prescription['taking_days'] = request.form.get('taking_days')
-            # prescription['daily_dose'] = request.form.get('daily_dose')
-            # # print(prescription)
-            # price_sum = round(get_price(herbs) * int(prescription['taking_days']), 0)
-            # write_prescription(prescription)
-    return render_template('index.html', herbs=herbs, formula_names=formula_names, prescription=prescription,
-                           price_sum=price_sum)
+    pass
+    # return render_template('index.html', herbs=herbs, formula_names=formula_names, prescription=prescription,
+                        #    price_sum=price_sum)
 
 
 @app.route('/view_prescription')
