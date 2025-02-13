@@ -6,18 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>查看药方</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function changeDate() {
+            var date = document.getElementById('date-select').value;
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'change_date';
+            input.value = date;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+        function deletePres(id) {
+            if (confirm('确定要删除该药方吗？')) {
+                const form = document.createElement('form');
+                var date = document.getElementById('date-select').value;
+                form.method = 'post';
+                form.action = '';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'delete_pres';
+                input.value = id;
+                const date_input = document.createElement('input');
+                date_input.type = 'hidden';
+                date_input.name = 'date';
+                date_input.value = date;
+                form.appendChild(input);
+                form.appendChild(date_input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        function editPres(id) {
+            const form = document.createElement('form');
+            var date = document.getElementById('date-select').value;
+            form.method = 'post';
+            form.action = '';
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'edit_pres';
+            input.value = id;
+            const date_input = document.createElement('input');
+            date_input.type = 'hidden';
+            date_input.name = 'date';
+            date_input.value = date;
+            form.appendChild(input);
+            form.appendChild(date_input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 </head>
 
 <body>
     <h1>查看药方</h1>
     <nav>
         <ul>
-            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
+            <li><a href="{{ url_for('index') }}">选择患者</a></li>
             <li><a href="#">查看药方</a></li>
             <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
         </ul>
     </nav>
+    <!-- 日期选择 -->
+    <label for="date-select">选择日期:</label>
+    <input type="date" id="date-select" name="date" value="{{ selected_date }}" onchange="changeDate()">
     <table>
         <thead>
             <tr>
@@ -25,11 +81,9 @@
                 <th>性别</th>
                 <th>年龄</th>
                 <th>日期</th>
-                <th>方剂模板</th>
-                <th>服用天数</th>
-                <th>每日剂量</th>
-                <th>药方名称</th>
-                <th>药材</th>
+                <th>付数</th>
+                <th>剂数</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
@@ -39,11 +93,12 @@
                 <td>{{ prescription.patient_gender }}</td>
                 <td>{{ prescription.patient_age }}</td>
                 <td>{{ prescription.prescription_date }}</td>
-                <td>{{ prescription.formula_template }}</td>
                 <td>{{ prescription.taking_days }}</td>
                 <td>{{ prescription.daily_dose }}</td>
-                <td>{{ prescription.name }}</td>
-                <td>{{ prescription.herbs }}</td>
+                <td>
+                    <button class="edit-button" onclick="editPres('{{ loop.index0 }}')">查看</button>
+                    <button class="delete-button" onclick="deletePres('{{ loop.index0 }}')">删除</button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

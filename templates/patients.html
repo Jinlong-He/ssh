@@ -12,46 +12,13 @@
             background-color: #d349a9;
         }
     </style>
-    <style>
-        label {
-            /* display: block; */
-            /* margin-bottom: 5px; */
-            font-weight: bold;
-            display: inline-block;
-            /* height: 140px; */
-            vertical-align: middle;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            box-sizing: border-box;
-        }
-        
-        input[type="submit"] {
-            background-color: #28a745; /* 绿色提交按钮 */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        input[type="submit"]:hover {
-            background-color: #218838; /* 鼠标悬停时提交按钮颜色变深 */
-        }
-        </style>
 </head>
 
 <body>
     <h1>患者信息</h1>
     <nav>
         <ul>
-            <li><a href="#">选择患者</a></li>
+            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
             <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
             <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
@@ -59,7 +26,8 @@
     </nav>
         <div class="patient-info">
             <label for="patient_phone">患者手机:</label>
-            <input type="text" id="patient_phone" placeholder="输入" oninput="autocompletePhone(this)"
+            <input type="text" id="patient_phone" name="patient_phone" >
+            <input type="text" class="patient_phone" placeholder="输入" oninput="autocompletePhone(this)"
                 onkeydown="handleKeyDown(event, this)">
             <ul class="suggestions"></ul>
             <label for="patient_name">患者姓名:</label>
@@ -69,7 +37,7 @@
             <label for="patient_year">出生年份:</label>
             <input type="text" id="patient_year" name="patient_year" >
             <br>
-            <button class="edit-button" id="start">开始就诊</button>
+            <button class="edit-button" id="sendTableData">保存药方</button>
         </div>
 
     <script>
@@ -89,14 +57,18 @@
                         li.textContent = key;
                         li.addEventListener('click', function () {
                             input.value = this.textContent;
-                            // const row = input.parentNode.parentNode;
-                            const nameInput = document.getElementById('patient_name');
-                            const genderInput = document.getElementById('patient_gender');
-                            const yearInput = document.getElementById('patient_year');
-                            nameInput.value = infos[key].patient_name
-                            genderInput.value = infos[key].patient_gender
-                            yearInput.value = infos[key].patient_year
+                            const row = input.parentNode.parentNode;
+                            const nameInput = row.querySelector('.patient_name');
+                            const genderInput = row.querySelector('.patient_gender');
+                            const yearInput = row.querySelector('.patient_year');
+                            nameInput.value = infos[key].name
+                            genderInput.value = infos[key].gender
+                            yearInput.value = infos[key].year
                             suggestions.innerHTML = '';
+                            // calculateTotal(row);
+                            // 选择药材后自动聚焦到重量输入框
+                            // row.querySelector('.herb-weight').focus();
+                            // calculateGrandTotal();
                         });
                         suggestions.appendChild(li);
                     }
@@ -129,41 +101,63 @@
                 const highlightedItem = suggestionItems[highlightedIndex];
                 if (highlightedItem) {
                     input.value = highlightedItem.textContent;
+                    const row = input.parentNode.parentNode;
                     const key = input.value;
-                    const nameInput = document.getElementById('patient_name');
-                    const genderInput = document.getElementById('patient_gender');
-                    const yearInput = document.getElementById('patient_year');
-                    nameInput.value = infos[key].patient_name;
-                    genderInput.value = infos[key].patient_gender;
-                    yearInput.value = infos[key].patient_year;
+                    const nameInput = row.querySelector('.patient_name');
+                    const genderInput = row.querySelector('.patient_gender');
+                    const yearInput = row.querySelector('.patient_year');
+                    nameInput.value = infos[key].name
+                    genderInput.value = infos[key].gender
+                    yearInput.value = infos[key].year
                     suggestions.innerHTML = '';
                 }
             }
         }
 
         // 添加点击事件监听器，用于发送表格数据
-        document.getElementById('start').addEventListener('click', function () {
-            phone = document.getElementById('patient_phone').value;
+        document.getElementById('sendTableData').addEventListener('click', function () {
+            const table = document.getElementById('prescription-table');
+            const rows = table.tBodies[0].rows;
+            const tableData = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const nameInput = row.querySelector('.herb-name');
+                const weightInput = row.querySelector('.herb-weight');
+                const priceInput = row.querySelector('.herb-price');
+                const totalInput = row.querySelector('.herb-total');
+                const rowData = {
+                    herbName: nameInput.value,
+                    weight: weightInput.value,
+                    price: priceInput.value,
+                    total: totalInput.value
+                };
+                tableData.push(rowData);
+            }
             patient_info = {
                 patient_name: document.getElementById('patient_name').value,
                 patient_gender: document.getElementById('patient_gender').value,
-                patient_age: document.getElementById('patient_year').value,
-                patient_phone: document.getElementById('patient_phone').value,
+                patient_age: document.getElementById('patient_age').value,
+                prescription_date: document.getElementById('prescription_date').value,
+                taking_days: document.getElementById('prescription_pay_count').value,
+                daily_dose: document.getElementById('prescription_dose_count').value,
+            }
+            const dateToSend = {
+                tableData: tableData,
+                total_price: document.getElementById('grand-total').value,
+                patient_info: patient_info
             };
             // 使用 fetch API 发送数据
-            fetch('/start', {
+            fetch('/send_prescription_table', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(patient_info)
+                body: JSON.stringify(dateToSend)
             })
            .then(response => response.json())
            .then(data => {
                 console.log('服务器响应:', data);
-                targetUrl = `new_prescription?phone=${phone}`;
-                window.location.href = targetUrl;
-                // alert('保存成功')
+                alert('保存成功')
             })
            .catch(error => {
                 console.error('请求出错:', error);

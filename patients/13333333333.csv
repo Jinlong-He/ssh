@@ -1,0 +1,2 @@
+patient_name,patient_gender,patient_age,patient_phone,prescription_date,taking_days,daily_dose,herbs,weights,price_gs,prices,total_price,syms,other
+锦龙,男,30,13333333333,2025-02-13,14,28,柴胡/炒白芍/川芎/枳壳/陈皮/姜半夏/炙甘草/香附,15/12/15/15/12/12/6/12,0.2/0/0.18/0.112/0.08/0/0/0.08,3/0/2.7/1.68/0.96/0/0/0.96,130.20,心悸/乏力,111

@@ -18,7 +18,7 @@
     <h1>新建药方</h1>
     <nav>
         <ul>
-            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
+            <li><a href="{{ url_for('index') }}">选择患者</a></li>
             <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
             <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
@@ -27,34 +27,44 @@
     <div class="container">
         <!-- 左侧：药方模板选择或新建 -->
         <div class="left-panel">
-            <h2>选择药方模板或新建</h2>
+            <h2>选择药方</h2>
             <button type="button" class="formula-button-new" onclick="newFormula(this)">新建空白药方</button>
             <div id="formula-buttons">
                 {% for formula_name in formula_names %}
                 <button type="button" class="formula-button" onclick="selectFormula(this, '{{ formula_name }}')">{{ formula_name }}</button>
-                <br>
                 {% endfor %}
             </div>
+            <h2>过往药方</h2>
         </div>
         <!-- 右侧：分页表格 -->
         <div class="right-panel">
             <!-- 新增患者信息部分 -->
             <div class="patient-info">
                 <label for="patient_name">患者姓名:</label>
-                <input type="text" id="patient_name" name="patient_name" value="张三">
+                <input type="text" id="patient_name" name="patient_name" value="{{info.patient_name}}">
                 <label for="patient_gender">性别:</label>
-                <input type="text" id="patient_gender" name="patient_gender" value="男">
+                <input type="text" id="patient_gender" name="patient_gender" value="{{info.patient_gender}}">
                 <label for="patient_age">年龄:</label>
-                <input type="text" id="patient_age" name="patient_age" value="30">
+                <input type="text" id="patient_age" name="patient_age" value="{{info.patient_age}}">
+                <label for="patient_phone">手机:</label>
+                <input type="text" id="patient_phone" name="patient_phone" value="{{info.patient_phone}}">
                 <br>
                 <label for="prescription_date">日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期:</label>
                 <input type="date" id="prescription_date" name="prescription_date" value="{{ today_date }}">
-                <label for="prescription_pay_count">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;付数:</label>
-                <input type="text" id="prescription_pay_count" name="prescription_pay_count" value="14" oninput="calculateGrandTotal()">
-                <label for="prescription_dose_count">剂数:</label>
-                <input type="text" id="prescription_dose_count" name="prescription_dose_count" value="28">
+                <label for="taking_days">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;付数:</label>
+                <input type="text" id="taking_days" name="taking_days" value="14" oninput="calculateGrandTotal()">
+                <label for="daily_dose">剂数:</label>
+                <input type="text" id="daily_dose" name="daily_dose" value="28">
                 <button class="edit-button" id="sendTableData">保存药方</button>
             </div>
+            <h3>症状</h3>
+            <div id="symptom-buttons">
+                {% for sym in syms %}
+                <button type="button" class="symptom-button" name="{{sym}}" onclick="selectSym(this, '{{ sym }}')">{{ sym }}</button>
+                {% endfor %}
+            </div>
+            <h3>其他症状</h3>
+            <input type="text" id="other" name="other" class="uniform-form-field" style="width: 500px;">
             <h2>药方详情</h2>
             <table id="prescription-table">
                 <thead>
@@ -110,7 +120,6 @@
                             input.value = this.textContent;
                             const row = input.parentNode.parentNode;
                             const priceInput = row.querySelector('.herb-price');
-                            const key = Object.keys(herbs).find(k => herbs[k].name === this.textContent);
                             priceInput.value = herbs[key].price_per_g;
                             suggestions.innerHTML = '';
                             calculateTotal(row);
@@ -260,7 +269,7 @@
                     sum += value;
                 }
             });
-            const payCount = parseFloat(document.getElementById('prescription_pay_count').value);
+            const payCount = parseFloat(document.getElementById('taking_days').value);
             const grandTotalInput = document.getElementById('grand-total');
             if (!isNaN(payCount)) {
                 grandTotalInput.value = (sum * payCount).toFixed(2);
@@ -273,6 +282,14 @@
             const table = document.getElementById('prescription-table');
             const rows = table.tBodies[0].rows;
             const tableData = [];
+            const buttons = document.querySelectorAll('.symptom-button');
+            const syms = []
+            for (let i = 0; i < buttons.length; i++) {
+                const button = buttons[i];
+                if (button.classList.contains('selected')){
+                    syms.push(button.name);
+                }
+            }
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
                 const nameInput = row.querySelector('.herb-name');
@@ -291,14 +308,17 @@
                 patient_name: document.getElementById('patient_name').value,
                 patient_gender: document.getElementById('patient_gender').value,
                 patient_age: document.getElementById('patient_age').value,
+                patient_phone: document.getElementById('patient_phone').value,
                 prescription_date: document.getElementById('prescription_date').value,
-                taking_days: document.getElementById('prescription_pay_count').value,
-                daily_dose: document.getElementById('prescription_dose_count').value,
+                taking_days: document.getElementById('taking_days').value,
+                daily_dose: document.getElementById('daily_dose').value,
             }
             const dateToSend = {
                 tableData: tableData,
                 total_price: document.getElementById('grand-total').value,
-                patient_info: patient_info
+                patient_info: patient_info,
+                syms: syms,
+                other: document.getElementById('other').value
             };
             // 使用 fetch API 发送数据
             fetch('/send_prescription_table', {
@@ -311,6 +331,7 @@
            .then(response => response.json())
            .then(data => {
                 console.log('服务器响应:', data);
+                alert('保存成功')
             })
            .catch(error => {
                 console.error('请求出错:', error);
@@ -383,6 +404,15 @@
 
             // 新行添加后自动聚焦到新的药材名称输入框
             nameInput.focus();
+        }
+        function selectSym(button, sym) {
+            // buttons.forEach(btn => btn.classList.remove('selected'));
+            // 给当前点击的按钮添加选中状态
+            if (button.classList.contains('selected')){
+                button.classList.remove('selected');
+            } else {
+                button.classList.add('selected');
+            }
         }
 
         const formulas = {{ formulas|tojson }};

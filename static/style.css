@@ -107,6 +107,15 @@ tr:nth-child(even) {
     border-radius: 3px;
 }
 
+.view-button {
+    background-color: #3030df; /* 绿色背景 */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
 .edit-button:hover {
     background-color: #218838; /* 鼠标悬停时颜色加深 */
 }
@@ -182,6 +191,23 @@ input[type="date"].uniform-form-field {
 
 .formula-button.selected {
     background-color: #098e45;
+    color: white;
+}
+
+.symptom-button {
+    background-color: #007BFF; /* 蓝色按钮背景 */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.symptom-button.selected {
+    background-color: #8e090b;
     color: white;
 }
 

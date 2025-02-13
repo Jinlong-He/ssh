@@ -21,7 +21,7 @@ def process_csv_file(input_file, output_file):
     try:
         # 打开输入文件进行读取
         with open(input_file, 'r', newline='', encoding='utf-8') as infile:
-            reader = csv.DictReader(infile, delimiter='\t')
+            reader = csv.DictReader(infile)
             # 获取原有的列名
             fieldnames = reader.fieldnames
             # 增加新的列名“缩写”
@@ -29,7 +29,7 @@ def process_csv_file(input_file, output_file):
 
             # 打开输出文件进行写入
             with open(output_file, 'w', newline='', encoding='utf-8') as outfile:
-                writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter='\t')
+                writer = csv.DictWriter(outfile, fieldnames=fieldnames)
                 # 写入表头
                 writer.writeheader()
 
