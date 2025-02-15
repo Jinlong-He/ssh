@@ -79,9 +79,11 @@ def read_herbs_abb():
 
 def write_patient(info):
     try:
+        fieldnames = ['patient_name', 'patient_phone', 'patient_gender', 'patient_year']
         with open('patient.csv', 'a', newline='', encoding='utf-8') as file:
-            writer = csv.DictWriter(file)
-            writer.writeheader()
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            if file.tell() == 0:
+                writer.writeheader()
             writer.writerow(info)
     except FileNotFoundError:
         pass
@@ -368,6 +370,7 @@ def start():
     infos = read_patients()
     patient_info = request.get_json()
     patient_phone = patient_info['patient_phone']
+    print(patient_info)
     if patient_phone not in infos:
         write_patient(patient_info)
     # 在这里可以对数据进行处理，例如保存到数据库等
