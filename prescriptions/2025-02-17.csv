@@ -1,0 +1,3 @@
+patient_name,patient_gender,patient_age,patient_phone,prescription_date,taking_days,daily_dose,herbs,weights,price_gs,prices,total_price,syms,other
+哈哈哈,男,35,13322223333,2025-02-17,14,28,花蛇草/羌活,14/13,0.088/0.48,1.23/6.24,104.58,乏力/便溏,123
+哈哈哈,男,35,13322223333,2025-02-17,14,28,花蛇草/羌活/桑白皮/秦艽,14/13/14/11,0.088/0.48/0.12/0.26,1.23/6.24/1.68/2.86,168.14,失眠/心悸,111

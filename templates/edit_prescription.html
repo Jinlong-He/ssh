@@ -18,7 +18,7 @@
     <h1>查看药方</h1>
     <nav>
         <ul>
-            <li><a href="{{ url_for('new_prescription') }}">新建药方</a></li>
+            <li><a href="{{ url_for('index') }}">选择患者</a></li>
             <li><a href="{{ url_for('view_prescription') }}">查看药方</a></li>
             <li><a href="{{ url_for('manage_herbs') }}">管理药材</a></li>
             <li><a href="{{ url_for('manage_formulas') }}">管理方剂</a></li>
@@ -86,6 +86,7 @@
 
     <script>
         const herbs = {{ herbs|tojson }};
+        const herbs_abb = {{ herbs_abb|tojson }};
         let highlightedIndex = 0; // 记录当前高亮的候选项索引
         const selected_syms = {{selected_syms|tojson}};
         const buttons = document.querySelectorAll('.symptom-button');
@@ -114,23 +115,25 @@
             highlightedIndex = 0; // 重置高亮索引
 
             if (value.length > 0) {
-                for (const key in herbs) {
+                for (const key in herbs_abb) {
                     if (key.startsWith(value)) {
-                        const li = document.createElement('li');
-                        li.textContent = herbs[key].name;
-                        li.addEventListener('click', function () {
-                            input.value = this.textContent;
-                            const row = input.parentNode.parentNode;
-                            const priceInput = row.querySelector('.herb-price');
-                            const key = Object.keys(herbs).find(k => herbs[k].name === this.textContent);
-                            priceInput.value = herbs[key].price_per_g;
-                            suggestions.innerHTML = '';
-                            calculateTotal(row);
-                            // 选择药材后自动聚焦到重量输入框
-                            row.querySelector('.herb-weight').focus();
-                            calculateGrandTotal();
-                        });
-                        suggestions.appendChild(li);
+                        for (let i = 0; i < herbs_abb[key].length; i++) {
+                            name = herbs_abb[key][i];
+                            const li = document.createElement('li');
+                            li.textContent = name;
+                            li.addEventListener('click', function () {
+                                input.value = this.textContent;
+                                const row = input.parentNode.parentNode;
+                                const priceInput = row.querySelector('.herb-price');
+                                priceInput.value = herbs[name];
+                                suggestions.innerHTML = '';
+                                calculateTotal(row);
+                                // 选择药材后自动聚焦到重量输入框
+                                row.querySelector('.herb-weight').focus();
+                                calculateGrandTotal();
+                            });
+                            suggestions.appendChild(li);
+                        }
                     }
                 }
                 if (suggestions.firstChild) {
@@ -178,13 +181,17 @@
                 if (highlightedItem) {
                     input.value = highlightedItem.textContent;
                     const row = input.parentNode.parentNode;
-                    const key = Object.keys(herbs).find(k => herbs[k].name === highlightedItem.textContent);
                     const priceInput = row.querySelector('.herb-price');
-                    priceInput.value = herbs[key].price_per_g;
+                    priceInput.value = herbs[highlightedItem.textContent];
                     suggestions.innerHTML = '';
                     calculateTotal(row);
                     // 选择药材后自动聚焦到重量输入框
-                    row.querySelector('.herb-weight').focus();
+                    weightInput = row.querySelector('.herb-weight');
+                    weightInput.focus();
+                    // 检查输入框是否有内容
+                    if (weightInput.value) {
+                        weightInput.select();
+                    }
                     calculateGrandTotal();
                 }
             }

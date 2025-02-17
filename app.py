@@ -64,18 +64,20 @@ def read_herbs_dict():
 
 
 def read_herbs_abb():
+    herbs_abb = {}
     herbs = {}
     try:
         with open('herbs.csv', 'r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                herbs[row['key']] = {
-                    'name': row['name'],
-                    'price_per_g': float(row['price_per_g'])
-                }
+                if row['key'] not in herbs_abb:
+                    herbs_abb[row['key']] = [row['name']]
+                else:
+                    herbs_abb[row['key']].append([row['name']])
+                herbs[row['name']] = float(row['price_per_g'])
     except FileNotFoundError:
         pass
-    return herbs
+    return (herbs_abb,herbs)
 
 def write_patient(info):
     try:
@@ -193,6 +195,7 @@ def read_prescriptions_by_date(selected_date):
                     'prices': row['prices'].split('/'),
                     'total_price': row['total_price'],
                     'syms': row['syms'].split('/'),
+                    'syms_name': row['syms'],
                     'other': row['other']
                 }
                 prescriptions.append(prescription)
@@ -221,6 +224,7 @@ def read_prescriptions_by_phone(phone):
                     'prices': row['prices'].split('/'),
                     'total_price': row['total_price'],
                     'syms': row['syms'].split('/'),
+                    'abs': row['prescription_date'] + ':' + row['syms'].replace('/',','),
                     'other': row['other']
                 }
                 prescriptions.append(prescription)
@@ -401,7 +405,7 @@ def view_prescription():
             pres_id = int(request.form.get('edit_pres'))
             selected_date = request.form.get('date')
             prescriptions = read_prescriptions_by_date(selected_date)
-            herbs = read_herbs_abb()
+            (herbs_abb,herbs) = read_herbs_abb()
             prescription = prescriptions[pres_id]
             items = []
             syms = read_symptom()
@@ -411,7 +415,7 @@ def view_prescription():
                               'weight': prescription['weights'][i],
                               'price_per_g': prescription['price_gs'][i],
                               'price': prescription['prices'][i]})
-            return render_template('edit_prescription.html', prescription=prescription, herbs=herbs, items = items, syms=syms, selected_syms=selected_syms)
+            return render_template('edit_prescription.html', prescription=prescription, herbs_abb=herbs_abb, herbs=herbs, items = items, syms=syms, selected_syms=selected_syms)
     return render_template('view_prescription.html', prescriptions=prescriptions, selected_date=selected_date)
 
 
@@ -456,7 +460,7 @@ def new_prescription():
     infos = read_patients()
     info = infos[patient_phone]
     info['patient_age'] = int(str(datetime.date.today()).split('-')[0]) - int(info['patient_year'])
-    herbs = read_herbs_abb()
+    (herbs_abb,herbs) = read_herbs_abb()
     syms = read_symptom()
     today_date = datetime.date.today()
     (formula_names, formulas) = read_formulas()
@@ -468,7 +472,7 @@ def new_prescription():
             price_per_g = herbs_dict[item['name']]
             item['price_per_g'] = price_per_g
             item['price'] = round(float(price_per_g) * int(item['weight']), 2)
-    return render_template('new_prescription.html', herbs=herbs, today_date=today_date, formula_names=formula_names, formulas=formulas, info=info, syms = syms, prescriptions = prescriptions)
+    return render_template('new_prescription.html', herbs_abb=herbs_abb, herbs=herbs, today_date=today_date, formula_names=formula_names, formulas=formulas, info=info, syms = syms, prescriptions = prescriptions)
 
 @app.route('/send_prescription_table', methods=['POST'])
 def send_prescription_table():

@@ -35,6 +35,11 @@
                 {% endfor %}
             </div>
             <h2>过往药方</h2>
+            <div id="pre-buttons">
+                {% for prescription in prescriptions %}
+                <button type="button" class="formula-button" onclick="selectPres(this, '{{loop.index0}}')">{{ prescription.abs }}</button>
+                {% endfor %}
+            </div>
         </div>
         <!-- 右侧：分页表格 -->
         <div class="right-panel">
@@ -103,6 +108,7 @@
 
     <script>
         const herbs = {{ herbs|tojson }};
+        const herbs_abb = {{ herbs_abb|tojson }};
         let highlightedIndex = 0; // 记录当前高亮的候选项索引
 
         function autocompleteHerbs(input) {
@@ -112,22 +118,25 @@
             highlightedIndex = 0; // 重置高亮索引
 
             if (value.length > 0) {
-                for (const key in herbs) {
+                for (const key in herbs_abb) {
                     if (key.startsWith(value)) {
-                        const li = document.createElement('li');
-                        li.textContent = herbs[key].name;
-                        li.addEventListener('click', function () {
-                            input.value = this.textContent;
-                            const row = input.parentNode.parentNode;
-                            const priceInput = row.querySelector('.herb-price');
-                            priceInput.value = herbs[key].price_per_g;
-                            suggestions.innerHTML = '';
-                            calculateTotal(row);
-                            // 选择药材后自动聚焦到重量输入框
-                            row.querySelector('.herb-weight').focus();
-                            calculateGrandTotal();
-                        });
-                        suggestions.appendChild(li);
+                        for (let i = 0; i < herbs_abb[key].length; i++) {
+                            name = herbs_abb[key][i];
+                            const li = document.createElement('li');
+                            li.textContent = name;
+                            li.addEventListener('click', function () {
+                                input.value = this.textContent;
+                                const row = input.parentNode.parentNode;
+                                const priceInput = row.querySelector('.herb-price');
+                                priceInput.value = herbs[name];
+                                suggestions.innerHTML = '';
+                                calculateTotal(row);
+                                // 选择药材后自动聚焦到重量输入框
+                                row.querySelector('.herb-weight').focus();
+                                calculateGrandTotal();
+                            });
+                            suggestions.appendChild(li);
+                        }
                     }
                 }
                 if (suggestions.firstChild) {
@@ -175,13 +184,18 @@
                 if (highlightedItem) {
                     input.value = highlightedItem.textContent;
                     const row = input.parentNode.parentNode;
-                    const key = Object.keys(herbs).find(k => herbs[k].name === highlightedItem.textContent);
+                    // const key = Object.keys(herbs).find(k => herbs[k].name === highlightedItem.textContent);
                     const priceInput = row.querySelector('.herb-price');
-                    priceInput.value = herbs[key].price_per_g;
+                    priceInput.value = herbs[highlightedItem.textContent];
                     suggestions.innerHTML = '';
                     calculateTotal(row);
                     // 选择药材后自动聚焦到重量输入框
-                    row.querySelector('.herb-weight').focus();
+                    weightInput = row.querySelector('.herb-weight');
+                    weightInput.focus();
+                    // 检查输入框是否有内容
+                    if (weightInput.value) {
+                        weightInput.select();
+                    }
                     calculateGrandTotal();
                 }
             }
@@ -420,6 +434,8 @@
             // 移除所有按钮的选中状态
             const buttons = document.querySelectorAll('.formula-button');
             buttons.forEach(btn => btn.classList.remove('selected'));
+            const buttons1 = document.querySelectorAll('.pre-button');
+            buttons1.forEach(btn => btn.classList.remove('selected'));
             // 给当前点击的按钮添加选中状态
             button.classList.add('selected');
             const formula = formulas[formulaName];
@@ -479,6 +495,95 @@
                 totalInput.className = 'herb-total';
                 totalInput.readonly = true;
                 totalInput.value = item['price'];
+                totalCell.appendChild(totalInput);
+
+                const actionCell = newRow.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.className = 'delete-button'
+                deleteButton.onclick = function () {
+                    deleteRow(this);
+                    calculateGrandTotal();
+                };
+                actionCell.appendChild(deleteButton);
+            }
+            calculateGrandTotal();
+        }
+
+        const prescriptions = {{ prescriptions|tojson }};
+        function selectPres(button, index) {
+            // 移除所有按钮的选中状态
+            const buttons = document.querySelectorAll('.formula-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            const buttons1 = document.querySelectorAll('.pre-button');
+            buttons1.forEach(btn => btn.classList.remove('selected'));
+            // 给当前点击的按钮添加选中状态
+            button.classList.add('selected');
+            const prescription = prescriptions[index];
+            const buttons2 = document.querySelectorAll('.symptom-button');
+            buttons2.forEach(btn => btn.classList.remove('selected'));
+            for (let i = 0; i < buttons2.length; i++) {
+                const button = buttons2[i];
+                if (prescription.abs.includes(button.name)){
+                    button.classList.add('selected');
+                }
+            }
+            document.getElementById('other').value = prescription['other'];
+            const table = document.getElementById('prescription-table');
+            const tBody = table.tBodies[0];
+            const rows = tBody.rows;
+            const rowCount = rows.length;
+            for (let i = rowCount - 1; i >= 0; i--) {
+                tBody.deleteRow(i);
+            }
+            for (let i = 0; i < prescription.herbs.length; i++) {
+                const newRow = tBody.insertRow();
+                const nameCell = newRow.insertCell();
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'herb-name';
+                nameInput.placeholder = '输入药材首字母';
+                nameInput.oninput = function () {
+                    autocompleteHerbs(this);
+                };
+                nameInput.onkeydown = function (e) {
+                    handleKeyDown(e, this);
+                };
+                const nameSuggestions = document.createElement('ul');
+                nameSuggestions.className = 'suggestions';
+                nameInput.value = prescription.herbs[i];
+                nameCell.appendChild(nameInput);
+                nameCell.appendChild(nameSuggestions);
+
+                const weightCell = newRow.insertCell();
+                const weightInput = document.createElement('input');
+                weightInput.type = 'number';
+                weightInput.className = 'herb-weight';
+                weightInput.step = '0.01';
+                weightInput.oninput = function () {
+                    calculateTotal(newRow);
+                    calculateGrandTotal();
+                };
+                weightInput.onkeydown = function (e) {
+                    handleWeightKeyDown(e, this);
+                };
+                weightInput.value = prescription.weights[i];
+                weightCell.appendChild(weightInput);
+
+                const priceCell = newRow.insertCell();
+                const priceInput = document.createElement('input');
+                priceInput.type = 'text';
+                priceInput.className = 'herb-price';
+                priceInput.readonly = true;
+                priceInput.value = prescription.price_gs[i];
+                priceCell.appendChild(priceInput);
+
+                const totalCell = newRow.insertCell();
+                const totalInput = document.createElement('input');
+                totalInput.type = 'text';
+                totalInput.className = 'herb-total';
+                totalInput.readonly = true;
+                totalInput.value = prescription.prices[i];
                 totalCell.appendChild(totalInput);
 
                 const actionCell = newRow.insertCell();
